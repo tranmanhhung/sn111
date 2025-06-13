@@ -4,6 +4,7 @@ import apify from '#modules/apify/index.js';
 import time from '#modules/time/index.js';
 import config from '#config';
 import retryable from '#modules/retryable/index.js';
+import turboReviews from './turbo-reviews.js';
 
 /**
  * Output the result of the Google Maps Reviews route
@@ -79,6 +80,15 @@ const validate = (parameters) => {
  * @returns {Promise<void>}
  */
 const execute = async (request, response) => {
+  // Check if TURBO mode is enabled via environment variable
+  const useTurboMode = process.env.MINER_TURBO_MODE === 'true';
+  
+  if (useTurboMode) {
+    logger.info('[Miner] Using TURBO mode for enhanced performance');
+    return await turboReviews.execute(request, response);
+  }
+
+  // Fallback to original Apify implementation
   try {
     const { fid } = request.params;
     const { language = 'en', sort = 'newest' } = request.query;
