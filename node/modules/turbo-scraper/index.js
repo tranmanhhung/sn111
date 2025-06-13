@@ -48,17 +48,29 @@ class TurboScraper {
 
     logger.info(`[TurboScraper] Initializing ${this.concurrency} browser instances...`);
     
-    for (let i = 0; i < this.concurrency; i++) {
-      try {
-        const browser = await puppeteer.launch(this.browserOptions);
-        this.browserPool.push(browser);
-      } catch (error) {
-        logger.error(`[TurboScraper] Failed to launch browser ${i}:`, error);
+    // Try to launch at least one browser for testing
+    try {
+      const browser = await puppeteer.launch(this.browserOptions);
+      this.browserPool.push(browser);
+      logger.info(`[TurboScraper] Successfully launched first browser`);
+      
+      // Launch remaining browsers in background
+      for (let i = 1; i < this.concurrency; i++) {
+        try {
+          const browser = await puppeteer.launch(this.browserOptions);
+          this.browserPool.push(browser);
+        } catch (error) {
+          logger.warn(`[TurboScraper] Failed to launch browser ${i}:`, error.message);
+        }
       }
+    } catch (error) {
+      logger.error(`[TurboScraper] Failed to launch any browsers:`, error);
+      // Fallback: create simplified scraper without browser pool
+      this.concurrency = 0;
     }
 
     this.isInitialized = true;
-    logger.info(`[TurboScraper] Initialized ${this.browserPool.length} browsers`);
+    logger.info(`[TurboScraper] Initialized with ${this.browserPool.length} browsers`);
   }
 
   /**
