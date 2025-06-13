@@ -60,7 +60,7 @@ class TurboScraper {
           const browser = await puppeteer.launch(this.browserOptions);
           this.browserPool.push(browser);
         } catch (error) {
-          logger.warn(`[TurboScraper] Failed to launch browser ${i}:`, error.message);
+          logger.warning(`[TurboScraper] Failed to launch browser ${i}:`, error.message);
         }
       }
     } catch (error) {

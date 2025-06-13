@@ -45,6 +45,7 @@ async function initializeTurboSystem() {
 
     // Initialize scraper browser pool
     await turboScraper.initialize();
+    logger.info(`[TurboReviews] Browser pool initialized with ${turboScraper.browserPool.length} browsers`);
     
     // Start background prefetching for predicted FIDs
     startBackgroundPrefetching();
@@ -157,15 +158,45 @@ const execute = async (request, response) => {
     
     // Launch parallel scraping
     const scrapeStartTime = Date.now();
-    reviews = await Promise.race([
-      turboScraper.scrapeReviewsByFID(fid, { language, sort }),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Scrape timeout')), scrapeTimeout)
-      )
-    ]);
+    
+    try {
+      // Try TurboScraper first
+      reviews = await Promise.race([
+        turboScraper.scrapeReviewsByFID(fid, { language, sort }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Scrape timeout')), scrapeTimeout)
+        )
+      ]);
+      
+      // If TurboScraper returns 0 reviews, fallback to Apify
+      if (!reviews || reviews.length === 0) {
+        logger.info(`[TurboReviews] TurboScraper returned 0 reviews, falling back to Apify...`);
+        
+        // Import Apify modules
+        const apify = (await import('../../../modules/apify/index.js')).default;
+        const retryable = (await import('../../../modules/retryable/index.js')).default;
+        const config = (await import('../../../config.js')).default;
+        
+        // Use Apify as fallback but with optimizations
+        reviews = await retryable(async () => {
+          return await apify.runActorAndGetResults(config.MINER.APIFY_ACTORS.GOOGLE_MAPS_REVIEWS, {
+            placeFIDs: [fid],
+            maxItems: 300, // Increased from 100
+            language: language,
+            sort: sort,
+          });
+        }, 5); // Reduced retries for speed
+        
+        logger.info(`[TurboReviews] Apify fallback returned ${reviews?.length || 0} reviews`);
+      }
+      
+    } catch (error) {
+      logger.error(`[TurboReviews] Scraping failed:`, error);
+      reviews = [];
+    }
 
     const scrapeTime = Date.now() - scrapeStartTime;
-    logger.info(`[TurboReviews] Scraped ${reviews?.length || 0} reviews in ${scrapeTime}ms`);
+    logger.info(`[TurboReviews] Total scrape: ${reviews?.length || 0} reviews in ${scrapeTime}ms`);
 
     // Step 3: Optimize response for maximum score
     if (!reviews || reviews.length === 0) {
@@ -213,7 +244,7 @@ const execute = async (request, response) => {
     try {
       const fallbackReviews = await smartCache.getReviews(request.params.fid, {});
       if (fallbackReviews && fallbackReviews.length > 0) {
-        logger.warn(`[TurboReviews] Using stale cache as fallback`);
+        logger.warning(`[TurboReviews] Using stale cache as fallback`);
         return responseService.success(response, {
           status: 'success',
           source: 'fallback_cache',

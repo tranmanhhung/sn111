@@ -89,7 +89,7 @@ class ResponseOptimizer {
     // If we're really short on reviews, we might need to
     // enhance existing reviews or find alternative sources
     if (reviews.length < 50) {
-      logger.warn(`[ResponseOptimizer] Low review count: ${reviews.length}`);
+      logger.warning(`[ResponseOptimizer] Low review count: ${reviews.length}`);
       // Could implement fallback strategies here
     }
     
@@ -204,7 +204,7 @@ class ResponseOptimizer {
     // If we're running out of time, truncate to ensure fast response
     if (remainingTime < 5000) { // Less than 5 seconds left
       const safeCount = Math.max(50, Math.floor(reviews.length * 0.8));
-      logger.warn(`[ResponseOptimizer] Time pressure - returning ${safeCount} reviews`);
+      logger.warning(`[ResponseOptimizer] Time pressure - returning ${safeCount} reviews`);
       return reviews.slice(0, safeCount);
     }
     

@@ -80,12 +80,12 @@ class SmartCache {
       if (data && isFresh) {
         this.stats.hits++;
         const reviews = JSON.parse(data);
-        logger.debug(`[SmartCache] Cache HIT for ${fid} - ${reviews.length} reviews`);
+        logger.info(`[SmartCache] Cache HIT for ${fid} - ${reviews.length} reviews`);
         return reviews;
       }
 
       this.stats.misses++;
-      logger.debug(`[SmartCache] Cache MISS for ${fid}`);
+      logger.info(`[SmartCache] Cache MISS for ${fid}`);
       return null;
 
     } catch (error) {
@@ -118,7 +118,7 @@ class SmartCache {
       };
       await this.redis.setex(metaKey, ttl, JSON.stringify(metadata));
 
-      logger.debug(`[SmartCache] Stored ${reviews.length} reviews for ${fid} (TTL: ${ttl}s)`);
+      logger.info(`[SmartCache] Stored ${reviews.length} reviews for ${fid} (TTL: ${ttl}s)`);
       
     } catch (error) {
       logger.error('[SmartCache] Error storing reviews:', error);
@@ -171,7 +171,7 @@ class SmartCache {
       }
 
       try {
-        logger.debug(`[SmartCache] Prefetching ${fid}`);
+        logger.info(`[SmartCache] Prefetching ${fid}`);
         const reviews = await scraper.scrapeReviewsByFID(fid);
         
         if (reviews && reviews.length > 0) {
@@ -234,7 +234,7 @@ class SmartCache {
     try {
       // Redis handles TTL automatically, but we can track evictions
       const info = await this.redis.info('memory');
-      logger.debug('[SmartCache] Memory cleanup performed');
+      logger.info('[SmartCache] Memory cleanup performed');
       
     } catch (error) {
       logger.error('[SmartCache] Error during cleanup:', error);
