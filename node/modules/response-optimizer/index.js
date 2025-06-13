@@ -1,5 +1,5 @@
-import logger from '#modules/logger/index.js';
-import time from '#modules/time/index.js';
+import logger from '../logger/index.js';
+import time from '../time/index.js';
 
 /**
  * Response Optimizer for Maximum Validator Scores

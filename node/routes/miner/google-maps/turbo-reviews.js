@@ -1,10 +1,10 @@
 import logger from '#modules/logger/index.js';
 import responseService from '#modules/response/index.js';
 import time from '#modules/time/index.js';
-import TurboScraper from '#modules/turbo-scraper/index.js';
-import SmartCache from '#modules/smart-cache/index.js';
-import FIDPredictor from '#modules/fid-predictor/index.js';
-import ResponseOptimizer from '#modules/response-optimizer/index.js';
+import TurboScraper from '../../../modules/turbo-scraper/index.js';
+import SmartCache from '../../../modules/smart-cache/index.js';
+import FIDPredictor from '../../../modules/fid-predictor/index.js';
+import ResponseOptimizer from '../../../modules/response-optimizer/index.js';
 
 // Initialize components
 let turboScraper = null;

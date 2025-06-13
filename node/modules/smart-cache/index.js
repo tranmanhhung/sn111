@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
-import logger from '#modules/logger/index.js';
-import time from '#modules/time/index.js';
+import logger from '../logger/index.js';
+import time from '../time/index.js';
 
 /**
  * Smart Caching System with Predictive Pre-loading

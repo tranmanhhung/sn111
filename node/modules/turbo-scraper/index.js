@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
 import cluster from 'cluster';
 import os from 'os';
-import logger from '#modules/logger/index.js';
+import logger from '../logger/index.js';
 
 /**
  * Ultra-Fast Google Maps Scraper

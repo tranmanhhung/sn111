@@ -1,4 +1,4 @@
-import logger from '#modules/logger/index.js';
+import logger from '../logger/index.js';
 import { City, State } from 'country-state-city';
 import crypto from 'crypto';
 
